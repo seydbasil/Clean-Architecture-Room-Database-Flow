@@ -59,14 +59,13 @@ class DBViewActivity : ComponentActivity() {
                             columns = getColumnList(database, it)
 
                             visibleScreen = VisibleScreen.TableView
-                        },
-                        onBackPress = {
-
                         })
                 }
 
                 is VisibleScreen.TableView -> {
-                    TableDataGrid(columns, tableData)
+                    TableDataGrid(columns, tableData, onBackPress = {
+                        visibleScreen = VisibleScreen.TableListView
+                    })
                 }
             }
         }
@@ -78,15 +77,9 @@ class DBViewActivity : ComponentActivity() {
 fun ListView(
     modifier: Modifier = Modifier,
     tableList: List<String>,
-    onClickItem: (tableName: String) -> Unit,
-    onBackPress: () -> Unit
+    onClickItem: (tableName: String) -> Unit
 ) {
     Column(modifier = modifier) {
-        Text(modifier = Modifier
-            .clickable {
-                onBackPress()
-            }
-            .padding(30.dp), text = "back")
         LazyColumn(modifier = Modifier
             .fillMaxSize()
             .weight(1f), content = {
@@ -103,8 +96,17 @@ fun ListView(
 
 
 @Composable
-fun TableDataGrid(columns: List<String>, tableData: List<TableRow>) {
+fun TableDataGrid(
+    columns: List<String>, tableData: List<TableRow>, onBackPress: () -> Unit
+) {
     Column(modifier = Modifier.fillMaxSize()) {
+        Text(modifier = Modifier
+            .fillMaxWidth()
+            .background(color = Color(0xFFFF0000))
+            .clickable {
+                onBackPress()
+            }
+            .padding(10.dp), text = "back")
         LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
