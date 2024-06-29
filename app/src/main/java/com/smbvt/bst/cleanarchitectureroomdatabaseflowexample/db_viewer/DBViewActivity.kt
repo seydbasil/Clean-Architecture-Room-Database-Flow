@@ -3,6 +3,7 @@ package com.smbvt.bst.cleanarchitectureroomdatabaseflowexample.db_viewer
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.room.RoomDatabase
@@ -40,6 +42,7 @@ class DBViewActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val tableList = getTableList(database)
+        var columns = listOf<String>()
         var tableData: List<TableRow> = listOf()
 
         setContent {
@@ -53,6 +56,8 @@ class DBViewActivity : ComponentActivity() {
                         tableList = tableList,
                         onClickItem = {
                             tableData = getTableData(database, it)
+                            columns = getColumnList(database, it)
+
                             visibleScreen = VisibleScreen.TableView
                         },
                         onBackPress = {
@@ -61,7 +66,7 @@ class DBViewActivity : ComponentActivity() {
                 }
 
                 is VisibleScreen.TableView -> {
-                    TableDataGrid(tableData)
+                    TableDataGrid(columns, tableData)
                 }
             }
         }
@@ -98,16 +103,32 @@ fun ListView(
 
 
 @Composable
-fun TableDataGrid(tableData: List<TableRow>) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        items(tableData.size) { rowIndex ->
-            TableRowComposable(row = tableData[rowIndex])
+fun TableDataGrid(columns: List<String>, tableData: List<TableRow>) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(color = Color(0x30000000))
+                .padding(4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            items(columns.size) { columnIndex ->
+                Text(
+                    text = columns[columnIndex], fontSize = 16.sp, modifier = Modifier.padding(8.dp)
+                )
+            }
+        }
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f)
+        ) {
+            items(tableData.size) { rowIndex ->
+                TableRowComposable(row = tableData[rowIndex])
+            }
         }
     }
+
 }
 
 @Composable
@@ -142,6 +163,25 @@ fun getTableList(db: RoomDatabase): List<String> {
 
     readableDB.close()
     return tableList
+}
+
+fun getColumnList(db: RoomDatabase, tableName: String): List<String> {
+    val columnList = mutableListOf<String>()
+    val readableDB = db.openHelper.readableDatabase
+
+
+    val cursor = readableDB.query("PRAGMA table_info($tableName)", arrayOf())
+    cursor.use {
+        if (it.moveToFirst()) {
+            val nameIndex = it.getColumnIndex("name")
+            do {
+                columnList.add(it.getString(nameIndex))
+            } while (it.moveToNext())
+        }
+    }
+
+    db.close()
+    return columnList
 }
 
 fun getTableData(db: RoomDatabase, tableName: String): List<TableRow> {
