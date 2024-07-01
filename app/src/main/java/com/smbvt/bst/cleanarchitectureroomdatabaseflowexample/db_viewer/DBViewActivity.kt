@@ -6,11 +6,17 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,6 +26,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.room.RoomDatabase
@@ -45,41 +53,152 @@ class DBViewActivity : ComponentActivity() {
         var columns = listOf<String>()
         var tableData: List<TableRow> = listOf()
 
+
         setContent {
+
             var visibleScreen: VisibleScreen by remember {
                 mutableStateOf(VisibleScreen.TableListView)
             }
 
-            when (visibleScreen) {
-                is VisibleScreen.TableListView -> {
-                    ListView(modifier = Modifier.fillMaxSize(),
-                        tableList = tableList,
-                        onClickItem = {
-                            tableData = getTableData(database, it)
-                            columns = getColumnList(database, it)
+            DBViewScreen(tableList = tableList,
+                columns = columns,
+                tableData = tableData,
+                updateColumnList = {
+                    columns = getColumnList(database, it)
+                },
+                updateTableData = {
+                    tableData = getTableData(database, it)
+                },
+                visibleScreen = visibleScreen,
+                updateVisibleScreen = {
+                    visibleScreen = it
+                })
+        }
+    }
+}
 
-                            visibleScreen = VisibleScreen.TableView
-                        })
-                }
+@Composable
+fun DBViewScreen(
+    tableList: List<String> = listOf(),
+    columns: List<String> = listOf(),
+    tableData: List<TableRow> = listOf(),
+    updateColumnList: (name: String) -> Unit = {},
+    updateTableData: (name: String) -> Unit = {},
+    visibleScreen: VisibleScreen = VisibleScreen.TableListView,
+    updateVisibleScreen: (visibleScreen: VisibleScreen) -> Unit = {},
+) {
 
-                is VisibleScreen.TableView -> {
-                    TableDataGrid(columns, tableData, onBackPress = {
-                        visibleScreen = VisibleScreen.TableListView
-                    })
-                }
-            }
+    when (visibleScreen) {
+        is VisibleScreen.TableListView -> {
+            ListView(modifier = Modifier.fillMaxSize(), tableList = tableList, onClickItem = {
+                updateColumnList(it)
+                updateTableData(it)
+                updateVisibleScreen(VisibleScreen.TableView)
+            })
+        }
+
+        is VisibleScreen.TableView -> {
+            TableDataGrid(columns, tableData, onBackPress = {
+                updateVisibleScreen(VisibleScreen.TableListView)
+            })
         }
     }
 }
 
 
+@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
+@Composable
+fun PreviewDBViewScreenTables() {
+    DBViewScreen(
+        tableList = listOf(
+            "table 1",
+            "table 2",
+            "table 3",
+            "table 4",
+            "table 5",
+            "table 6",
+        )
+    )
+}
+
+
+@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
+@Composable
+fun PreviewDBViewScreenData() {
+    DBViewScreen(
+        tableList = listOf(
+            "table 1",
+            "table 2",
+            "table 3",
+            "table 4",
+            "table 5",
+            "table 6",
+        ),
+        visibleScreen = VisibleScreen.TableView,
+        columns = listOf("Column 1", "Column 2", "Column 3", "Column 4", "Column 5"),
+        tableData = listOf(
+            TableRow(
+                columns = listOf(
+                    "item 1",
+                    "item 2",
+                    "item 3",
+                    "item 4",
+                    "item 5",
+                )
+            ),
+            TableRow(
+                columns = listOf(
+                    "item 1",
+                    "item 2",
+                    "item 3",
+                    "item 4",
+                    "item 5",
+                )
+            ),
+            TableRow(
+                columns = listOf(
+                    "item 1",
+                    "item 2",
+                    "item 3",
+                    "item 4",
+                    "item 5",
+                )
+            ),
+            TableRow(
+                columns = listOf(
+                    "item 1",
+                    "item 2",
+                    "item 3",
+                    "item 4",
+                    "item 5",
+                )
+            ),
+            TableRow(
+                columns = listOf(
+                    "item 1",
+                    "item 2",
+                    "item 3",
+                    "item 4",
+                    "item 5",
+                )
+            ),
+        )
+    )
+}
+
 @Composable
 fun ListView(
-    modifier: Modifier = Modifier,
-    tableList: List<String>,
-    onClickItem: (tableName: String) -> Unit
+    modifier: Modifier = Modifier, tableList: List<String>, onClickItem: (tableName: String) -> Unit
 ) {
     Column(modifier = modifier) {
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(color = Color.DarkGray)
+                .padding(5.dp),
+            text = "Tables",
+            style = TextStyle(color = Color.White)
+        )
         LazyColumn(modifier = Modifier
             .fillMaxSize()
             .weight(1f), content = {
@@ -88,7 +207,7 @@ fun ListView(
                     .clickable {
                         onClickItem(tableList[it])
                     }
-                    .padding(24.dp), text = tableList[it])
+                    .padding(10.dp), text = tableList[it])
             })
         })
     }
@@ -100,13 +219,29 @@ fun TableDataGrid(
     columns: List<String>, tableData: List<TableRow>, onBackPress: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
-        Text(modifier = Modifier
-            .fillMaxWidth()
-            .background(color = Color(0xFFFF0000))
-            .clickable {
-                onBackPress()
-            }
-            .padding(10.dp), text = "back")
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(color = Color.DarkGray)
+                .padding(2.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.ArrowBack,
+                contentDescription = "Back",
+                tint = Color.Black,
+                modifier = Modifier.clickable(onClick = onBackPress)
+            )
+            Spacer(modifier = Modifier.size(20.dp))
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(5.dp),
+                text = "Table content (columns and rows)",
+                style = TextStyle(color = Color.White)
+            )
+        }
+
         LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
