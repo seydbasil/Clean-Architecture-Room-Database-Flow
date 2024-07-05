@@ -1,4 +1,3 @@
-
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -10,6 +9,13 @@ plugins {
 android {
     namespace = "com.smbvt.bst.cleanarchitectureroomdatabaseflowexample"
     compileSdk = 34
+
+    applicationVariants.all {
+        val variantName = this.flavorName
+
+        // Leverage Gradle property for dynamic naming (recommended)
+        project.setProperty("archivesBaseName", "DatabaseApp-$variantName")
+    }
 
     defaultConfig {
         applicationId = "com.smbvt.bst.cleanarchitectureroomdatabaseflowexample"
@@ -25,14 +31,26 @@ android {
     }
 
     buildTypes {
+        debug {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+            )
+            // Set to null to override default debug keystore and defer to the product flavor.
+            signingConfig = signingConfigs.getByName("debug")
+
+            // take builds with separate package name. So we can install debug and release versions in same phone
+            applicationIdSuffix = ".d"
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
