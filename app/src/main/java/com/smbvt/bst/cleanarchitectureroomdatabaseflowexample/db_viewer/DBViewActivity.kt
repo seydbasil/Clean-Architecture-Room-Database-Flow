@@ -1,17 +1,25 @@
 package com.smbvt.bst.cleanarchitectureroomdatabaseflowexample.db_viewer
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
@@ -26,8 +34,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.room.RoomDatabase
@@ -40,6 +52,16 @@ sealed class VisibleScreen {
     data object TableView : VisibleScreen()
 }
 
+val Padding2 = 2.dp
+val Padding5 = 5.dp
+val Width3 = 3.dp
+val Height3 = 3.dp
+val Height1 = 1.dp
+val Width1 = 1.dp
+val Padding10 = 10.dp
+val Spacer20 = 20.dp
+
+
 @AndroidEntryPoint
 class DBViewActivity : ComponentActivity() {
 
@@ -50,9 +72,7 @@ class DBViewActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val tableList = getTableList(database)
-        var columns = listOf<String>()
         var tableData: List<TableRow> = listOf()
-
 
         setContent {
 
@@ -61,11 +81,7 @@ class DBViewActivity : ComponentActivity() {
             }
 
             DBViewScreen(tableList = tableList,
-                columns = columns,
                 tableData = tableData,
-                updateColumnList = {
-                    columns = getColumnList(database, it)
-                },
                 updateTableData = {
                     tableData = getTableData(database, it)
                 },
@@ -80,9 +96,7 @@ class DBViewActivity : ComponentActivity() {
 @Composable
 fun DBViewScreen(
     tableList: List<String> = listOf(),
-    columns: List<String> = listOf(),
     tableData: List<TableRow> = listOf(),
-    updateColumnList: (name: String) -> Unit = {},
     updateTableData: (name: String) -> Unit = {},
     visibleScreen: VisibleScreen = VisibleScreen.TableListView,
     updateVisibleScreen: (visibleScreen: VisibleScreen) -> Unit = {},
@@ -91,14 +105,13 @@ fun DBViewScreen(
     when (visibleScreen) {
         is VisibleScreen.TableListView -> {
             ListView(modifier = Modifier.fillMaxSize(), tableList = tableList, onClickItem = {
-                updateColumnList(it)
                 updateTableData(it)
                 updateVisibleScreen(VisibleScreen.TableView)
             })
         }
 
         is VisibleScreen.TableView -> {
-            TableDataGrid(columns, tableData, onBackPress = {
+            TableDataGrid(tableData, onBackPress = {
                 updateVisibleScreen(VisibleScreen.TableListView)
             })
         }
@@ -111,7 +124,7 @@ fun DBViewScreen(
 fun PreviewDBViewScreenTables() {
     DBViewScreen(
         tableList = listOf(
-            "table 1",
+            "table 1sdsadasdsadsdsadsdadsa,md,fsdfdsm,fm,dsmf,dsdfdsfdfsfdfsfdfsfdsvddsdsd",
             "table 2",
             "table 3",
             "table 4",
@@ -126,60 +139,65 @@ fun PreviewDBViewScreenTables() {
 @Composable
 fun PreviewDBViewScreenData() {
     DBViewScreen(
-        tableList = listOf(
-            "table 1",
-            "table 2",
-            "table 3",
-            "table 4",
-            "table 5",
-            "table 6",
-        ),
-        visibleScreen = VisibleScreen.TableView,
-        columns = listOf("Column 1", "Column 2", "Column 3", "Column 4", "Column 5"),
-        tableData = listOf(
+        visibleScreen = VisibleScreen.TableView, tableData = listOf(
             TableRow(
                 columns = listOf(
-                    "item 1",
-                    "item 2",
+                    "itemrere 1",
+                    "item4343 2",
                     "item 3",
-                    "item 4",
-                    "item 5",
+                    "item4343 4",
+                    "ite4343m 5",
+                    "item 6",
+                    "item4343 7",
+                    "item 8",
                 )
             ),
             TableRow(
                 columns = listOf(
-                    "item 1",
-                    "item 2",
+                    "itemrererererere 1",
+                    "item43344 2",
                     "item 3",
                     "item 4",
-                    "item 5",
+                    "ite4343m 5",
+                    "item 43436",
+                    "item 7",
+                    "item 8",
                 )
             ),
             TableRow(
                 columns = listOf(
-                    "item 1",
-                    "item 2",
+                    "itemrererererere 1",
+                    "item434344343343 2",
                     "item 3",
-                    "item 4",
+                    "item4343 4",
                     "item 5",
+                    "item4343 6",
+                    "item 7",
+                    "item4343 8",
                 )
             ),
             TableRow(
                 columns = listOf(
-                    "item 1",
-                    "item 2",
-                    "item 3",
+                    "ite 1",
+                    "item443 2",
+                    "item43 3",
                     "item 4",
-                    "item 5",
+                    "item5454 5",
+                    "it 6",
+                    "item33434 7",
+                    "item 8",
                 )
             ),
             TableRow(
                 columns = listOf(
-                    "item 1",
-                    "item 2",
+                    "itemre 1",
+                    "item43 2",
                     "item 3",
                     "item 4",
                     "item 5",
+                    "item 6",
+                    "item4343 7",
+                    "item43434343 8",
                 )
             ),
         )
@@ -195,7 +213,7 @@ fun ListView(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(color = Color.DarkGray)
-                .padding(5.dp),
+                .padding(Padding5),
             text = "Tables",
             style = TextStyle(color = Color.White)
         )
@@ -207,7 +225,7 @@ fun ListView(
                     .clickable {
                         onClickItem(tableList[it])
                     }
-                    .padding(10.dp), text = tableList[it])
+                    .padding(Padding10), text = tableList[it])
             })
         })
     }
@@ -216,60 +234,139 @@ fun ListView(
 
 @Composable
 fun TableDataGrid(
-    columns: List<String>, tableData: List<TableRow>, onBackPress: () -> Unit
+    tableData: List<TableRow>, onBackPress: () -> Unit
 ) {
+   /* val list =
+        listOf(
+            listOf("www","wwwwwwww","wwwwwwww","WWWWWWWWWWWWW","wwww","ww", "1"),
+            listOf("dsds","dsdsfdfsdsdfsdfdsfds","dsdsfsdfdsf","dsds","dsds","dsds", "dsdsd"),
+            listOf("dsdxc","ds dfsdfdfdsdxc","dsdxfsd df dsfdsc","dsdxc","fsfdfdsfds df sdsdxc", "dsdxc", "dsds dsds")
+        )*/
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(color = Color.DarkGray)
-                .padding(2.dp),
+                .padding(Padding2),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = Icons.Rounded.ArrowBack,
                 contentDescription = "Back",
-                tint = Color.Black,
+                tint = Color.White,
                 modifier = Modifier.clickable(onClick = onBackPress)
             )
-            Spacer(modifier = Modifier.size(20.dp))
+            Spacer(modifier = Modifier.size(Spacer20))
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(5.dp),
+                    .padding(Padding5),
                 text = "Table content (columns and rows)",
                 style = TextStyle(color = Color.White)
             )
         }
 
+        Log.e("____________", "tableData : $tableData")
+
         LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(color = Color(0x30000000))
-                .padding(4.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .background(color = Color(0x30000000)),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            items(columns.size) { columnIndex ->
-                Text(
-                    text = columns[columnIndex], fontSize = 16.sp, modifier = Modifier.padding(8.dp)
-                )
+            items(tableData.size) { rowIndex ->
+                LazyColumn(
+                    modifier = Modifier
+                        .wrapContentSize()
+                ) {
+                    items(tableData[rowIndex].columns.size) { columnIndex ->
+                        val biggestLength = tableData[rowIndex].columns.maxOfOrNull { it.length } ?: 0
+                        val biggestText =
+                            String(CharArray(biggestLength) { 'W' /* most widest char is capital W */ })
+                        Column(
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .background(color = Color.Gray),
+                        ) {
+                            MeasureUnconstrainedViewWidth(
+                                viewToMeasure = {
+                                    HeaderText(text = biggestText, columnIndex = columnIndex)
+                                }
+                            ) { measuredWidth ->
+                                Row(
+                                    modifier = Modifier
+                                        .height(IntrinsicSize.Min)
+                                        .background(color = Color.LightGray)
+                                ) {
+                                    HeaderText(
+                                        modifier = Modifier.width(measuredWidth),
+                                        text = tableData[rowIndex].columns[columnIndex],
+                                        columnIndex = columnIndex
+                                    )
+                                    Spacer(modifier = Modifier.width(Width3))
+                                    Box(
+                                        modifier = Modifier
+                                            .width(Width1)
+                                            .fillMaxHeight()
+                                            .background(color = Color.Gray)
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(Height1))
+                        }
+                    }
+                }
             }
         }
-        LazyColumn(
+
+        /*LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .background(color = Color.Red)
                 .weight(1f)
         ) {
             items(tableData.size) { rowIndex ->
-                TableRowComposable(row = tableData[rowIndex])
+                val biggestText = tableData[rowIndex].columns.maxByOrNull { it.length } ?: ""
+                Log.e("____________", "biggestText : $biggestText")
+                TableRow(row = tableData[rowIndex], biggestText = biggestText)
             }
-        }
+        }*/
     }
 
 }
 
+
 @Composable
-fun TableRowComposable(row: TableRow) {
+fun HeaderText(modifier: Modifier = Modifier, text: String, columnIndex: Int) {
+    Text(
+        modifier = modifier
+            .padding(Padding5), text = text, style = if (columnIndex == 0) {
+            TextStyle(fontWeight = FontWeight.Bold)
+        } else TextStyle.Default
+    )
+}
+
+@Composable
+fun MeasureUnconstrainedViewWidth(
+    viewToMeasure: @Composable () -> Unit,
+    content: @Composable (measuredWidth: Dp) -> Unit,
+) {
+    SubcomposeLayout { constraints ->
+        val measuredWidth = subcompose("viewToMeasure", viewToMeasure)[0]
+            .measure(Constraints()/*constraints.copy(maxHeight = Constraints.Infinity) if we need to handle height as well*/).width.toDp()
+
+        val contentPlaceable = subcompose("content") {
+            content(measuredWidth)
+        }[0].measure(constraints)
+        layout(contentPlaceable.width, contentPlaceable.height) {
+            contentPlaceable.place(0, 0)
+        }
+    }
+}
+
+
+@Composable
+fun TableRow(row: TableRow, biggestText: String) {
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -277,12 +374,21 @@ fun TableRowComposable(row: TableRow) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         items(row.columns.size) { columnIndex ->
-            Text(
-                text = row.columns[columnIndex], fontSize = 16.sp, modifier = Modifier.padding(8.dp)
-            )
+            MeasureUnconstrainedViewWidth(
+                viewToMeasure = {
+                    Text(biggestText)
+                }
+            ) { measuredWidth ->
+                Text(
+                    text = row.columns[columnIndex],
+                    fontSize = 16.sp,
+                    modifier = Modifier.width(measuredWidth)
+                )
+            }
         }
     }
 }
+
 
 fun getTableList(db: RoomDatabase): List<String> {
     val tableList = mutableListOf<String>()
@@ -322,16 +428,31 @@ fun getColumnList(db: RoomDatabase, tableName: String): List<String> {
 }
 
 fun getTableData(db: RoomDatabase, tableName: String): List<TableRow> {
+    val columnList = mutableListOf<String>()
+
     val readableDB = db.openHelper.readableDatabase
     val tableData = mutableListOf<TableRow>()
+
+    val cursorColumns = readableDB.query("PRAGMA table_info($tableName)", arrayOf())
+    cursorColumns.use {
+        if (it.moveToFirst()) {
+            val nameIndex = it.getColumnIndex("name")
+            do {
+                columnList.add(it.getString(nameIndex))
+            } while (it.moveToNext())
+        }
+    }
 
     val cursor = readableDB.query("SELECT * FROM $tableName", arrayOf())
     cursor.use {
         if (it.moveToFirst()) {
             val columnNames = it.columnNames
+            tableData.add(TableRow(columnNames.toList()))
             do {
+                
                 val columns =
                     columnNames.map { columnName -> it.getString(it.getColumnIndexOrThrow(columnName)) }
+
                 tableData.add(TableRow(columns))
             } while (it.moveToNext())
         }
