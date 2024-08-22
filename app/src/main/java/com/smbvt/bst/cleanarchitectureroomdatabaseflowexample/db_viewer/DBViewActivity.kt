@@ -72,7 +72,7 @@ class DBViewActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val tableList = getTableList(database)
-        var tableData: List<TableRow> = listOf()
+        var tableData: List<List<String>> = listOf()
 
         setContent {
 
@@ -96,7 +96,7 @@ class DBViewActivity : ComponentActivity() {
 @Composable
 fun DBViewScreen(
     tableList: List<String> = listOf(),
-    tableData: List<TableRow> = listOf(),
+    tableData: List<List<String>> = listOf(),
     updateTableData: (name: String) -> Unit = {},
     visibleScreen: VisibleScreen = VisibleScreen.TableListView,
     updateVisibleScreen: (visibleScreen: VisibleScreen) -> Unit = {},
@@ -139,68 +139,9 @@ fun PreviewDBViewScreenTables() {
 @Composable
 fun PreviewDBViewScreenData() {
     DBViewScreen(
-        visibleScreen = VisibleScreen.TableView, tableData = listOf(
-            TableRow(
-                columns = listOf(
-                    "itemrere 1",
-                    "item4343 2",
-                    "item 3",
-                    "item4343 4",
-                    "ite4343m 5",
-                    "item 6",
-                    "item4343 7",
-                    "item 8",
-                )
-            ),
-            TableRow(
-                columns = listOf(
-                    "itemrererererere 1",
-                    "item43344 2",
-                    "item 3",
-                    "item 4",
-                    "ite4343m 5",
-                    "item 43436",
-                    "item 7",
-                    "item 8",
-                )
-            ),
-            TableRow(
-                columns = listOf(
-                    "itemrererererere 1",
-                    "item434344343343 2",
-                    "item 3",
-                    "item4343 4",
-                    "item 5",
-                    "item4343 6",
-                    "item 7",
-                    "item4343 8",
-                )
-            ),
-            TableRow(
-                columns = listOf(
-                    "ite 1",
-                    "item443 2",
-                    "item43 3",
-                    "item 4",
-                    "item5454 5",
-                    "it 6",
-                    "item33434 7",
-                    "item 8",
-                )
-            ),
-            TableRow(
-                columns = listOf(
-                    "itemre 1",
-                    "item43 2",
-                    "item 3",
-                    "item 4",
-                    "item 5",
-                    "item 6",
-                    "item4343 7",
-                    "item43434343 8",
-                )
-            ),
-        )
+        visibleScreen = VisibleScreen.TableView,
+        tableData = listOf(
+        ),
     )
 }
 
@@ -234,14 +175,14 @@ fun ListView(
 
 @Composable
 fun TableDataGrid(
-    tableData: List<TableRow>, onBackPress: () -> Unit
+    tableData: List<List<String>>, onBackPress: () -> Unit
 ) {
-   /* val list =
-        listOf(
-            listOf("www","wwwwwwww","wwwwwwww","WWWWWWWWWWWWW","wwww","ww", "1"),
-            listOf("dsds","dsdsfdfsdsdfsdfdsfds","dsdsfsdfdsf","dsds","dsds","dsds", "dsdsd"),
-            listOf("dsdxc","ds dfsdfdfdsdxc","dsdxfsd df dsfdsc","dsdxc","fsfdfdsfds df sdsdxc", "dsdxc", "dsds dsds")
-        )*/
+    /* val list =
+         listOf(
+             listOf("www","wwwwwwww","wwwwwwww","WWWWWWWWWWWWW","wwww","ww", "1"),
+             listOf("dsds","dsdsfdfsdsdfsdfdsfds","dsdsfsdfdsf","dsds","dsds","dsds", "dsdsd"),
+             listOf("dsdxc","ds dfsdfdfdsdxc","dsdxfsd df dsfdsc","dsdxc","fsfdfdsfds df sdsdxc", "dsdxc", "dsds dsds")
+         )*/
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier
@@ -268,76 +209,71 @@ fun TableDataGrid(
 
         Log.e("____________", "tableData : $tableData")
 
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(color = Color(0x30000000)),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            items(tableData.size) { rowIndex ->
-                LazyColumn(
-                    modifier = Modifier
-                        .wrapContentSize()
-                ) {
-                    items(tableData[rowIndex].columns.size) { columnIndex ->
-                        val biggestLength = tableData[rowIndex].columns.maxOfOrNull { it.length } ?: 0
-                        val biggestText =
-                            String(CharArray(biggestLength) { 'W' /* most widest char is capital W */ })
-                        Column(
-                            modifier = Modifier
-                                .wrapContentWidth()
-                                .background(color = Color.Gray),
-                        ) {
-                            MeasureUnconstrainedViewWidth(
-                                viewToMeasure = {
-                                    HeaderText(text = biggestText, columnIndex = columnIndex)
-                                }
-                            ) { measuredWidth ->
-                                Row(
-                                    modifier = Modifier
-                                        .height(IntrinsicSize.Min)
-                                        .background(color = Color.LightGray)
-                                ) {
-                                    HeaderText(
-                                        modifier = Modifier.width(measuredWidth),
-                                        text = tableData[rowIndex].columns[columnIndex],
-                                        columnIndex = columnIndex
-                                    )
-                                    Spacer(modifier = Modifier.width(Width3))
-                                    Box(
+        if (tableData.isNotEmpty()) {
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(color = Color(0x30000000)),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                items(tableData[0].size) { rowIndex ->
+                    LazyColumn(
+                        modifier = Modifier
+                            .wrapContentSize()
+                    ) {
+                        items(tableData.size) { columnIndex ->
+                            val biggestLength =
+                                tableData[columnIndex].maxOfOrNull { it.length } ?: 0
+                            val biggestText =
+                                String(CharArray(biggestLength) { 'W' /* most widest char is capital W */ })
+                            Column(
+                                modifier = Modifier
+                                    .wrapContentWidth()
+                                    .background(color = Color.Gray),
+                            ) {
+                                MeasureUnconstrainedViewWidth(
+                                    viewToMeasure = {
+                                        CellText(text = biggestText, columnIndex = columnIndex)
+                                    }
+                                ) { measuredWidth ->
+                                    Row(
                                         modifier = Modifier
-                                            .width(Width1)
-                                            .fillMaxHeight()
-                                            .background(color = Color.Gray)
-                                    )
+                                            .height(IntrinsicSize.Min)
+                                            .background(color = Color.LightGray)
+                                    ) {
+                                        CellText(
+                                            modifier = Modifier.width(measuredWidth),
+                                            text = tableData[columnIndex][rowIndex],
+                                            columnIndex = columnIndex
+                                        )
+                                        Spacer(modifier = Modifier.width(Width3))
+                                        Box(
+                                            modifier = Modifier
+                                                .width(Width1)
+                                                .fillMaxHeight()
+                                                .background(color = Color.Gray)
+                                        )
+                                    }
                                 }
+                                Spacer(modifier = Modifier.height(Height1))
                             }
-                            Spacer(modifier = Modifier.height(Height1))
                         }
                     }
                 }
             }
+        } else {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Database is empty")
+            }
         }
 
-        /*LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(color = Color.Red)
-                .weight(1f)
-        ) {
-            items(tableData.size) { rowIndex ->
-                val biggestText = tableData[rowIndex].columns.maxByOrNull { it.length } ?: ""
-                Log.e("____________", "biggestText : $biggestText")
-                TableRow(row = tableData[rowIndex], biggestText = biggestText)
-            }
-        }*/
     }
 
 }
 
 
 @Composable
-fun HeaderText(modifier: Modifier = Modifier, text: String, columnIndex: Int) {
+fun CellText(modifier: Modifier = Modifier, text: String, columnIndex: Int) {
     Text(
         modifier = modifier
             .padding(Padding5), text = text, style = if (columnIndex == 0) {
@@ -427,33 +363,21 @@ fun getColumnList(db: RoomDatabase, tableName: String): List<String> {
     return columnList
 }
 
-fun getTableData(db: RoomDatabase, tableName: String): List<TableRow> {
-    val columnList = mutableListOf<String>()
-
+fun getTableData(db: RoomDatabase, tableName: String): List<List<String>> {
     val readableDB = db.openHelper.readableDatabase
-    val tableData = mutableListOf<TableRow>()
-
-    val cursorColumns = readableDB.query("PRAGMA table_info($tableName)", arrayOf())
-    cursorColumns.use {
-        if (it.moveToFirst()) {
-            val nameIndex = it.getColumnIndex("name")
-            do {
-                columnList.add(it.getString(nameIndex))
-            } while (it.moveToNext())
-        }
-    }
+    val tableData = mutableListOf<List<String>>()
 
     val cursor = readableDB.query("SELECT * FROM $tableName", arrayOf())
     cursor.use {
         if (it.moveToFirst()) {
             val columnNames = it.columnNames
-            tableData.add(TableRow(columnNames.toList()))
+            tableData.add(columnNames.toList())
             do {
-                
+
                 val columns =
                     columnNames.map { columnName -> it.getString(it.getColumnIndexOrThrow(columnName)) }
 
-                tableData.add(TableRow(columns))
+                tableData.add(columns)
             } while (it.moveToNext())
         }
     }
