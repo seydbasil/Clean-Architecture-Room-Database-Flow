@@ -18,10 +18,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.Icon
@@ -210,57 +211,7 @@ fun TableDataGrid(
         Log.e("____________", "tableData : $tableData")
 
         if (tableData.isNotEmpty()) {
-            LazyRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(color = Color(0x30000000)),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                items(tableData[0].size) { rowIndex ->
-                    LazyColumn(
-                        modifier = Modifier
-                            .wrapContentSize()
-                    ) {
-                        items(tableData.size) { columnIndex ->
-                            val biggestLength =
-                                tableData[columnIndex].maxOfOrNull { it.length } ?: 0
-                            val biggestText =
-                                String(CharArray(biggestLength) { 'W' /* most widest char is capital W */ })
-                            Column(
-                                modifier = Modifier
-                                    .wrapContentWidth()
-                                    .background(color = Color.Gray),
-                            ) {
-                                MeasureUnconstrainedViewWidth(
-                                    viewToMeasure = {
-                                        CellText(text = biggestText, columnIndex = columnIndex)
-                                    }
-                                ) { measuredWidth ->
-                                    Row(
-                                        modifier = Modifier
-                                            .height(IntrinsicSize.Min)
-                                            .background(color = Color.LightGray)
-                                    ) {
-                                        CellText(
-                                            modifier = Modifier.width(measuredWidth),
-                                            text = tableData[columnIndex][rowIndex],
-                                            columnIndex = columnIndex
-                                        )
-                                        Spacer(modifier = Modifier.width(Width3))
-                                        Box(
-                                            modifier = Modifier
-                                                .width(Width1)
-                                                .fillMaxHeight()
-                                                .background(color = Color.Gray)
-                                        )
-                                    }
-                                }
-                                Spacer(modifier = Modifier.height(Height1))
-                            }
-                        }
-                    }
-                }
-            }
+            TableView(modifier = Modifier.fillMaxSize(), tableData = tableData)
         } else {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text("Database is empty")
@@ -269,6 +220,86 @@ fun TableDataGrid(
 
     }
 
+}
+
+@Composable
+fun TableView(modifier: Modifier = Modifier, tableData: List<List<String>> = listOf()) {
+    /*  LazyColumn(Modifier.horizontalScroll(rememberScrollState())) {
+          items(1000){
+              Row() {
+
+              }
+          }
+      }
+      LazyRow(Modifier.verticalScroll(rememberScrollState())) {
+          items(10) {
+              Column {
+                  MeasureUnconstrainedViewWidth(viewToMeasure = {
+                      Text(text = "")
+                  }){
+
+                  }
+                  for (i in 0..100) {
+                      Text(text = (i * 1000000).toString())
+                  }
+              }
+          }
+      }
+      return*/
+
+    Row(
+        modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .fillMaxWidth()
+            .background(color = Color(0x30000000)),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        for (rowIndex in tableData[0].indices) {
+//        items(tableData[0].size) { rowIndex ->
+            Column(
+                modifier = Modifier.height(800.dp)
+            ) {
+//                items(tableData.size) { columnIndex ->
+                for (columnIndex in tableData.indices){
+                    val biggestLength =
+                        tableData[columnIndex].maxOfOrNull { it.length } ?: 0
+                    val biggestText =
+                        String(CharArray(biggestLength) { 'W'  /*most widest char is capital W*/ })
+                    Column(
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .background(color = Color.Gray),
+                    ) {
+                        MeasureUnconstrainedViewWidth(
+                            viewToMeasure = {
+                                CellText(text = biggestText, columnIndex = columnIndex)
+                            }
+                        ) { measuredWidth ->
+                            Row(
+                                modifier = Modifier
+                                    .height(IntrinsicSize.Min)
+                                    .background(color = Color.LightGray)
+                            ) {
+                                CellText(
+                                    modifier = Modifier.width(measuredWidth),
+                                    text = tableData[columnIndex][rowIndex],
+                                    columnIndex = columnIndex
+                                )
+                                Spacer(modifier = Modifier.width(Width3))
+                                Box(
+                                    modifier = Modifier
+                                        .width(Width1)
+                                        .fillMaxHeight()
+                                        .background(color = Color.Gray)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(Height1))
+                    }
+                }
+            }
+        }
+    }
 }
 
 
@@ -324,6 +355,71 @@ fun TableRow(row: TableRow, biggestText: String) {
         }
     }
 }
+
+/*@Composable
+fun RowScope.TableCell(
+    text: String,
+    weight: Float
+) {
+    Text(
+        text = text,
+        Modifier
+            .border(1.dp, Color.Black)
+            .weight(weight)
+            .padding(8.dp)
+    )
+}
+
+@Composable
+fun TableScreen() {
+    // Just a fake data... a Pair of Int and String
+    val tableData = (1..100).mapIndexed { index, item ->
+        index to "Item $index"
+    }
+    // Each cell of a column must have the same weight.
+    val column1Weight = .3f // 30%
+    val column2Weight = .7f // 70%
+    // The LazyColumn will be our table. Notice the use of the weights below
+    LazyColumn(Modifier.fillMaxSize().padding(16.dp)) {
+        // Here is the header
+        item {
+            Row(Modifier.background(Color.Gray)) {
+                TableCell(text = "Column 1", weight = column1Weight)
+                TableCell(text = "Column 2", weight = column2Weight)
+            }
+        }
+        // Here are all the lines of your table.
+        items(tableData) {
+            val (id, text) = it
+            Row(Modifier.fillMaxWidth()) {
+                TableCell(text = id.toString(), weight = column1Weight)
+                TableCell(text = text, weight = column2Weight)
+            }
+        }
+    }
+}*/
+
+
+/*LazyVerticalGrid*/
+
+
+/*val rows = 3
+val columns = 3
+FlowRow(
+modifier = Modifier.padding(4.dp),
+horizontalArrangement = Arrangement.spacedBy(4.dp),
+maxItemsInEachRow = rows
+) {
+    val itemModifier = Modifier
+        .padding(4.dp)
+        .height(80.dp)
+        .weight(1f)
+        .clip(RoundedCornerShape(8.dp))
+        .background(MaterialColors.Blue200)
+    repeat(rows * columns) {
+        Spacer(modifier = itemModifier)
+    }
+}*/
 
 
 fun getTableList(db: RoomDatabase): List<String> {
