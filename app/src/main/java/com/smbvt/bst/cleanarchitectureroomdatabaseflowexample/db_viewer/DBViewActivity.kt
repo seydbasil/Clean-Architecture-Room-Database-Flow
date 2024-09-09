@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -224,38 +225,15 @@ fun TableDataGrid(
 
 @Composable
 fun TableView(modifier: Modifier = Modifier, tableData: List<List<String>> = listOf()) {
-    /*  LazyColumn(Modifier.horizontalScroll(rememberScrollState())) {
-          items(1000){
-              Row() {
-
-              }
-          }
-      }
-      LazyRow(Modifier.verticalScroll(rememberScrollState())) {
-          items(10) {
-              Column {
-                  MeasureUnconstrainedViewWidth(viewToMeasure = {
-                      Text(text = "")
-                  }){
-
-                  }
-                  for (i in 0..100) {
-                      Text(text = (i * 1000000).toString())
-                  }
-              }
-          }
-      }
-      return*/
-
-    Row(
+    LazyRow(
         modifier = Modifier
             .verticalScroll(rememberScrollState())
             .fillMaxWidth()
             .background(color = Color(0x30000000)),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        for (rowIndex in tableData[0].indices) {
-//        items(tableData[0].size) { rowIndex ->
+//        for (rowIndex in tableData[0].indices) {
+        items(tableData[0].size) { rowIndex ->
             Column(
                 modifier = Modifier.height(800.dp)
             ) {
