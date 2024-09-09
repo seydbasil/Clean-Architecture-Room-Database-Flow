@@ -1,5 +1,6 @@
 package com.smbvt.bst.cleanarchitectureroomdatabaseflowexample.db_viewer
 
+import android.database.Cursor
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -8,7 +9,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -179,12 +179,6 @@ fun ListView(
 fun TableDataGrid(
     tableData: List<List<String>>, onBackPress: () -> Unit
 ) {
-    /* val list =
-         listOf(
-             listOf("www","wwwwwwww","wwwwwwww","WWWWWWWWWWWWW","wwww","ww", "1"),
-             listOf("dsds","dsdsfdfsdsdfsdfdsfds","dsdsfsdfdsf","dsds","dsds","dsds", "dsdsd"),
-             listOf("dsdxc","ds dfsdfdfdsdxc","dsdxfsd df dsfdsc","dsdxc","fsfdfdsfds df sdsdxc", "dsdxc", "dsds dsds")
-         )*/
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier
@@ -212,7 +206,7 @@ fun TableDataGrid(
         Log.e("____________", "tableData : $tableData")
 
         if (tableData.isNotEmpty()) {
-            TableView(modifier = Modifier.fillMaxSize(), tableData = tableData)
+            TableView(tableData = tableData)
         } else {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text("Database is empty")
@@ -226,23 +220,23 @@ fun TableDataGrid(
 @Composable
 fun TableView(modifier: Modifier = Modifier, tableData: List<List<String>> = listOf()) {
     LazyRow(
-        modifier = Modifier
+        modifier = modifier
             .verticalScroll(rememberScrollState())
             .fillMaxWidth()
             .background(color = Color(0x30000000)),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-//        for (rowIndex in tableData[0].indices) {
-        items(tableData[0].size) { rowIndex ->
+        items(tableData.size) { rowIndex ->
             Column(
-                modifier = Modifier.height(800.dp)
+                modifier = Modifier
             ) {
-//                items(tableData.size) { columnIndex ->
-                for (columnIndex in tableData.indices){
-                    val biggestLength =
-                        tableData[columnIndex].maxOfOrNull { it.length } ?: 0
-                    val biggestText =
-                        String(CharArray(biggestLength) { 'W'  /*most widest char is capital W*/ })
+                val biggestLength =
+                    tableData[rowIndex].maxOfOrNull { it.length } ?: 0
+                val biggestText =
+                    String(CharArray(biggestLength) { 'W'  /*most widest char is capital W*/ })
+
+                for (columnIndex in tableData[rowIndex].indices) {
+
                     Column(
                         modifier = Modifier
                             .wrapContentWidth()
@@ -260,7 +254,7 @@ fun TableView(modifier: Modifier = Modifier, tableData: List<List<String>> = lis
                             ) {
                                 CellText(
                                     modifier = Modifier.width(measuredWidth),
-                                    text = tableData[columnIndex][rowIndex],
+                                    text = tableData[rowIndex][columnIndex],
                                     columnIndex = columnIndex
                                 )
                                 Spacer(modifier = Modifier.width(Width3))
@@ -442,22 +436,38 @@ fun getTableData(db: RoomDatabase, tableName: String): List<List<String>> {
     val tableData = mutableListOf<List<String>>()
 
     val cursor = readableDB.query("SELECT * FROM $tableName", arrayOf())
-    cursor.use {
+    cursor.use { it ->
         if (it.moveToFirst()) {
+//            val a = arrayListOf<String>()
             val columnNames = it.columnNames
-            tableData.add(columnNames.toList())
-            do {
+            columnNames.forEach {
+                tableData.add(getItemsFromColumn(cursor = cursor, columnName = it))
+            }
+            /*  tableData.add(columnNames.toList())
+              do {
+                  a.add(it.getString(it.getColumnIndexOrThrow(it.columnNames[0])))
+  //                val columns =
+  //                    columnNames.map { columnName -> it.getString(it.getColumnIndexOrThrow(columnName)) }
 
-                val columns =
-                    columnNames.map { columnName -> it.getString(it.getColumnIndexOrThrow(columnName)) }
-
-                tableData.add(columns)
-            } while (it.moveToNext())
+              } while (it.moveToNext())
+              tableData.add(a)*/
         }
     }
 
-    db.close()
+//    db.close()
+    Log.e("_____________________", "tableData : $tableData")
     return tableData
+}
+
+fun getItemsFromColumn(cursor: Cursor, columnName: String): List<String> {
+    val items = mutableListOf<String>()
+    items.add(columnName)
+    if (cursor.moveToFirst()) {
+        do {
+            items.add(cursor.getString(cursor.getColumnIndexOrThrow(columnName)))
+        } while (cursor.moveToNext())
+    }
+    return items
 }
 
 data class TableRow(val columns: List<String>)
